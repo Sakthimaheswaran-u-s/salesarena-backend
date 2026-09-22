@@ -48,9 +48,14 @@ docker run --rm -p 8080:8080 \
 The frontend image proxies `/api` to this container, so when both run in Docker
 the browser never talks to the API directly and `CORS_ORIGINS` is not needed.
 
-On first start, if the `users` collection is empty, the server seeds 60 days
-of demo data (13 users, 720 daily rollups, ~1,400 events). The generator is a
-bit-for-bit port of the frontend's mock, so numbers match either way.
+On first start, if the `users` collection is empty, the server seeds 480 days
+(16 months) of demo data for 13 users. The generator is a bit-for-bit port of
+the frontend's mock, so numbers match either way.
+
+Seeding only runs when `users` is **empty**, so a database left over from an
+older build is never refreshed — a short history leaves the notice board with
+no closed quarters. To rebuild it, `POST /api/demo/reset` (needs `DEMO_MODE=true`)
+wipes the collections and re-seeds from scratch.
 
 Then start the frontend (`cd ../frontend && npm run dev`) — Vite proxies
 `/api` to `http://localhost:8080`.
