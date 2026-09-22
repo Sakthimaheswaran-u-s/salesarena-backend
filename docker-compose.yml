@@ -1,0 +1,41 @@
+services:
+  mongo:
+    image: mongo:7
+    ports: ["27017:27017"]
+    volumes: [mongo-data:/data/db]
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.runCommand({ping:1}).ok"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    ports: ["6379:6379"]
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes: [redis-data:/data]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build: .
+    ports: ["8080:8080"]
+    environment:
+      PORT: "8080"
+      MONGO_URI: mongodb://mongo:27017
+      MONGO_DB: salesarena
+      REDIS_ADDR: redis:6379
+      CORS_ORIGINS: http://localhost:5173,http://127.0.0.1:5173
+      TZ: ${TZ:-Asia/Kolkata}
+      DEMO_MODE: "true"
+      GIN_MODE: release
+    depends_on:
+      mongo: { condition: service_healthy }
+      redis: { condition: service_healthy }
+
+volumes:
+  mongo-data:
+  redis-data:
