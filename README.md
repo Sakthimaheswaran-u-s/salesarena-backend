@@ -31,6 +31,23 @@ go run ./cmd/server
 ### Option C — local Go with your own Mongo/Redis
 Point `MONGO_URI` / `REDIS_ADDR` at them (see `.env.example`) and `go run ./cmd/server`.
 
+### Standalone image
+`Dockerfile` is a two-stage build (Go 1.23 → static binary on Alpine, runs as a
+non-root user, `HEALTHCHECK` on `/healthz`). Configure it entirely through the
+environment variables listed in `.env.example`:
+
+```bash
+docker build -t salesarena-api .
+docker run --rm -p 8080:8080 \
+  -e MONGO_URI=mongodb://host.docker.internal:27017 \
+  -e REDIS_ADDR=host.docker.internal:6379 \
+  -e CORS_ORIGINS=http://localhost:5173 \
+  salesarena-api
+```
+
+The frontend image proxies `/api` to this container, so when both run in Docker
+the browser never talks to the API directly and `CORS_ORIGINS` is not needed.
+
 On first start, if the `users` collection is empty, the server seeds 60 days
 of demo data (13 users, 720 daily rollups, ~1,400 events). The generator is a
 bit-for-bit port of the frontend's mock, so numbers match either way.

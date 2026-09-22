@@ -1,0 +1,12 @@
+# Keep the build context to sources + go.mod/go.sum only.
+.git
+.gitignore
+.dockerignore
+Dockerfile
+docker-compose.yml
+Makefile
+README.md
+.env
+.env.*
+bin/
+logs/
